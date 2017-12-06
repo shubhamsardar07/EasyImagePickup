@@ -23,7 +23,14 @@ public class MainActivity extends AppCompatActivity implements EasyImagePickUP.I
     @Override
     public void onPicked(int from, String filename, Bitmap file, Uri uri) {
 
-        Log.d("Image Picked: ",filename);
+        Log.d("Image Picked: "+from,filename);
+        easyImagePickUP.performCrop(uri);
+
+    }
+
+    @Override
+    public void onCropped(int from, String filename, Bitmap file, Uri uri) {
+        Log.d("Image Cropped: "+from,filename);
     }
 
     @Override

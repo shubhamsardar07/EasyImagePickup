@@ -2,6 +2,7 @@ package dsardy.in.easyimagepickup;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -588,6 +589,28 @@ public class EasyImagePickUP
 
                 }
                 break;
+            case 2 :
+                if(resultCode==current_activity.RESULT_OK)
+                {
+                    Log.i("Crop","Photo");
+                    Uri selectedImage=data.getData();
+
+                    try
+                    {
+                        selected_path=null;
+                        selected_path=getPath(selectedImage);
+                        file_name =selected_path.substring(selected_path.lastIndexOf("/")+1);
+                        bitmap =compressImage(selectedImage.toString(),816,612);
+                        imageAttachment_callBack.onCropped(from, file_name, bitmap,selectedImage);
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+
+
+                }
+                break;
         }
 
 
@@ -762,6 +785,36 @@ public class EasyImagePickUP
 
     public interface ImagePickerListener {
         void onPicked(int from, String filename, Bitmap file, Uri uri);
+        void onCropped(int from, String filename, Bitmap file, Uri uri);
+
+    }
+
+    public void performCrop(Uri picUri) {
+
+        try {
+            //call the standard crop action intent (the user device may not support it)
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            //indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+            //set crop properties
+            cropIntent.putExtra("crop", "true");
+            //indicate aspect of desired crop
+            cropIntent.putExtra("aspectX", 1);
+            cropIntent.putExtra("aspectY", 1);
+            //indicate output X and Y
+            cropIntent.putExtra("outputX", 256);
+            cropIntent.putExtra("outputY", 256);
+            //retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            //start the activity - we handle returning in onActivityResult
+            current_activity.startActivityForResult(cropIntent, 2);
+        } catch (ActivityNotFoundException anfe) {
+            //display an error message
+            String errorMessage = "Whoops - your device doesn't support the crop action!";
+            Toast toast = Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
     }
 
 }
